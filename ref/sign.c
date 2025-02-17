@@ -23,8 +23,8 @@
 int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
   uint8_t seedbuf[2*SEEDBYTES + CRHBYTES];
   uint8_t tr[TRBYTES];
-  const uint8_t *rho, *rhoprime, *key;
-  polyvecl mat[K];
+  const uint8_t *rho, *rhoprime, *key;   // prime 角分符号 '
+  polyvecl mat[K];                       // A l × k
   polyvecl s1, s1hat;
   polyveck s2, t1, t0;
 
@@ -38,7 +38,7 @@ int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
   key = rhoprime + CRHBYTES;
 
   /* Expand matrix */
-  polyvec_matrix_expand(mat, rho);
+  polyvec_matrix_expand(mat, rho);        // ntt ?
 
   /* Sample short vectors s1 and s2 */
   polyvecl_uniform_eta(&s1, rhoprime, 0);
@@ -60,7 +60,7 @@ int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
   pack_pk(pk, rho, &t1);
 
   /* Compute H(rho, t1) and write secret key */
-  shake256(tr, TRBYTES, pk, CRYPTO_PUBLICKEYBYTES);
+  shake256(tr, TRBYTES, pk, CRYPTO_PUBLICKEYBYTES); // pk include rho & t1
   pack_sk(sk, rho, tr, key, &t0, &s1, &s2);
 
   return 0;
