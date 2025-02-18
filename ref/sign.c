@@ -113,7 +113,7 @@ int crypto_sign_signature_internal(uint8_t *sig,
   shake256_absorb(&state, pre, prelen);
   shake256_absorb(&state, m, mlen);
   shake256_finalize(&state);
-  shake256_squeeze(mu, CRHBYTES, &state);
+  shake256_squeeze(mu, CRHBYTES, &state);   // μ 
 
   /* Compute rhoprime = CRH(key, rnd, mu) */
   shake256_init(&state);
@@ -121,10 +121,10 @@ int crypto_sign_signature_internal(uint8_t *sig,
   shake256_absorb(&state, rnd, RNDBYTES);
   shake256_absorb(&state, mu, CRHBYTES);
   shake256_finalize(&state);
-  shake256_squeeze(rhoprime, CRHBYTES, &state);
+  shake256_squeeze(rhoprime, CRHBYTES, &state); // ρ' 不同于 keypair
 
   /* Expand matrix and transform vectors */
-  polyvec_matrix_expand(mat, rho);
+  polyvec_matrix_expand(mat, rho);    // restore A from ρ
   polyvecl_ntt(&s1);
   polyveck_ntt(&s2);
   polyveck_ntt(&t0);
