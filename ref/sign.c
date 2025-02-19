@@ -311,7 +311,7 @@ int crypto_sign_verify_internal(const uint8_t *sig,
   unpack_pk(rho, &t1, pk);
   if(unpack_sig(c, &z, &h, sig))
     return -1;
-  if(polyvecl_chknorm(&z, GAMMA1 - BETA))
+  if(polyvecl_chknorm(&z, GAMMA1 - BETA))       // check z
     return -1;
 
   /* Compute CRH(H(rho, t1), pre, msg) */
