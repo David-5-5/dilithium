@@ -94,7 +94,7 @@ int crypto_sign_signature_internal(uint8_t *sig,
   unsigned int n;
   uint8_t seedbuf[2*SEEDBYTES + TRBYTES + 2*CRHBYTES];
   uint8_t *rho, *tr, *key, *mu, *rhoprime;
-  uint16_t nonce = 0;
+  uint16_t nonce = 0;         // 计数器 
   polyvecl mat[K], s1, y, z;
   polyveck t0, s2, w1, w0, h;
   poly cp;
@@ -131,13 +131,13 @@ int crypto_sign_signature_internal(uint8_t *sig,
 
 rej:
   /* Sample intermediate vector y */
-  polyvecl_uniform_gamma1(&y, rhoprime, nonce++);
+  polyvecl_uniform_gamma1(&y, rhoprime, nonce++);     // y ∈ hat_S_γ1^l = ExpandMask(ρ', nonce)
 
   /* Matrix-vector multiplication */
   z = y;
   polyvecl_ntt(&z);
-  polyvec_matrix_pointwise_montgomery(&w1, mat, &z);
-  polyveck_reduce(&w1);
+  polyvec_matrix_pointwise_montgomery(&w1, mat, &z);  // w = Ay
+  polyveck_reduce(&w1);                               // w1 = HighBits_q(w, 2*γ2)
   polyveck_invntt_tomont(&w1);
 
   /* Decompose w and call the random oracle */
@@ -158,7 +158,7 @@ rej:
   polyvecl_invntt_tomont(&z);
   polyvecl_add(&z, &z, &y);
   polyvecl_reduce(&z);
-  if(polyvecl_chknorm(&z, GAMMA1 - BETA))
+  if(polyvecl_chknorm(&z, GAMMA1 - BETA))           // 检查安全性，不满足重新计算
     goto rej;
 
   /* Check that subtracting cs2 does not change high bits of w and low bits
@@ -167,19 +167,19 @@ rej:
   polyveck_invntt_tomont(&h);
   polyveck_sub(&w0, &w0, &h);
   polyveck_reduce(&w0);
-  if(polyveck_chknorm(&w0, GAMMA2 - BETA))
+  if(polyveck_chknorm(&w0, GAMMA2 - BETA))          // 检查安全性，不满足重新计算
     goto rej;
 
   /* Compute hints for w1 */
   polyveck_pointwise_poly_montgomery(&h, &cp, &t0);
   polyveck_invntt_tomont(&h);
   polyveck_reduce(&h);
-  if(polyveck_chknorm(&h, GAMMA2))
+  if(polyveck_chknorm(&h, GAMMA2))                  // 检查安全性，不满足重新计算
     goto rej;
 
   polyveck_add(&w0, &w0, &h);
   n = polyveck_make_hint(&h, &w0, &w1);
-  if(n > OMEGA)
+  if(n > OMEGA)                                    // 检查安全性，不满足重新计算
     goto rej;
 
   /* Write signature */
