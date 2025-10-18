@@ -381,6 +381,12 @@ void poly_uniform(poly *a,
 * Returns number of sampled coefficients. Can be smaller than len if not enough
 * random bytes were given.
 **************************************************/
+// refer to book hacker's delight remu5
+inline int remu5(unsigned n) {
+  n = (0x33333333 * n + (n>>3)) >> 29;
+  return (0x04432210 >> (n<<2)) & 7;
+}
+
 static unsigned int rej_eta(int32_t *a,
                             unsigned int len,
                             const uint8_t *buf,
@@ -395,8 +401,10 @@ static unsigned int rej_eta(int32_t *a,
     t0 = buf[pos] & 0x0F;
     t1 = buf[pos++] >> 4;
 
+
 #if ETA == 2
     if(t0 < 15) {
+      // remu5 method r = val - q * m; q = (205*val >> 10) * m
       t0 = t0 - (205*t0 >> 10)*5; // 数学等价： t0 % 5
       a[ctr++] = 2 - t0;
     }
