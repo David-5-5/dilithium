@@ -397,7 +397,7 @@ static unsigned int rej_eta(int32_t *a,
 
 #if ETA == 2
     if(t0 < 15) {
-      t0 = t0 - (205*t0 >> 10)*5;
+      t0 = t0 - (205*t0 >> 10)*5; // 数学等价： t0 % 5
       a[ctr++] = 2 - t0;
     }
     if(t1 < 15 && ctr < len) {
