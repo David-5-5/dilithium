@@ -38,12 +38,14 @@ int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
   key = rhoprime + CRHBYTES;
 
   /* Expand matrix */
-  polyvec_matrix_expand(mat, rho);        // ntt ?
+  // 通过rho确定性生成多项式矩阵A，采用NTT形式存储提升计算效率。
+  polyvec_matrix_expand(mat, rho);        // 从ρ扩展出矩阵A ∈ R_q^(k×l)
 
   /* Sample short vectors s1 and s2 */
-  polyvecl_uniform_eta(&s1, rhoprime, 0);
-  polyveck_uniform_eta(&s2, rhoprime, L);
-
+  // 从中心二项分布采样私钥向量 s1 和 s2 ，η 控制噪声幅度。
+  polyvecl_uniform_eta(&s1, rhoprime, 0);   // s1 ← S_η^l
+  polyveck_uniform_eta(&s2, rhoprime, L);   // s2 ← S_η^k
+  
   /* Matrix-vector multiplication */
   s1hat = s1;
   polyvecl_ntt(&s1hat);
